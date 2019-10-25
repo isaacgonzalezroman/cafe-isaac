@@ -3,14 +3,16 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
 
+// modelos
 const Usuario = require('../models/usuario');
+
+//Middlewares
+const { verificaToken, verificaAdminRole } = require('../middlewares/autenticacion');
 
 const app = express();
 
 
-app.get('/usuario', function(req, res) {
-
-
+app.get('/usuario', verificaToken, (req, res) => {
 
     let desde = req.query.desde || 0;
     desde = Number(desde);
@@ -40,13 +42,11 @@ app.get('/usuario', function(req, res) {
 
             });
 
-
         });
-
 
 });
 
-app.post('/usuario', function(req, res) {
+app.post('/usuario', [verificaToken, verificaAdminRole], (req, res) => {
 
     let body = req.body;
 
@@ -56,7 +56,6 @@ app.post('/usuario', function(req, res) {
         password: bcrypt.hashSync(body.password, 10),
         role: body.role
     });
-
 
     usuario.save((err, usuarioDB) => {
 
@@ -72,13 +71,12 @@ app.post('/usuario', function(req, res) {
             usuario: usuarioDB
         });
 
-
     });
-
 
 });
 
-app.put('/usuario/:id', function(req, res) {
+
+app.put('/usuario/:id', [verificaToken, verificaAdminRole], (req, res) => {
 
     let id = req.params.id;
     // Validar que solo actualizamos los datos que queremos (evitar que se actualicen por aquí el password u otras)
@@ -93,8 +91,6 @@ app.put('/usuario/:id', function(req, res) {
             });
         }
 
-
-
         res.json({
             ok: true,
             usuario: usuarioDB
@@ -104,8 +100,8 @@ app.put('/usuario/:id', function(req, res) {
 
 });
 
-app.delete('/usuario/:id', function(req, res) {
 
+app.delete('/usuario/:id', [verificaToken, verificaAdminRole], (req, res) => {
 
     let id = req.params.id;
 
@@ -140,10 +136,7 @@ app.delete('/usuario/:id', function(req, res) {
 
     });
 
-
-
 });
-
 
 
 module.exports = app;

@@ -44,7 +44,7 @@ let usuarioSchema = new Schema({
     }
 });
 
-
+// Esto excluye por seguridad la contraseña en las respuestas
 usuarioSchema.methods.toJSON = function() {
 
     let user = this;
